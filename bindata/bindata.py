@@ -87,8 +87,8 @@ class bindata :
 
         for index in self.set_of_indices :
 
-            selection = self.indices == index
-            self.nb[ index ] = sum( selection )
+            selection = np.where( self.indices == index )[0]
+            self.nb[ index ] = len( selection )
             self.data[ index ] = [ data[ selection ] for data in data ]
 
 

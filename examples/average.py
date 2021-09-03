@@ -6,6 +6,9 @@ figure_path = '../figures/'
 
 from pylab import *
 
+with open('seed.txt') as the_file :
+    seed( int( the_file.readline() ) )
+
 x = linspace(0,1,500)
 y = sin( 10*x ) + ( rand( len( x ) ) - .5 )
 
