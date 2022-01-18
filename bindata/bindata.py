@@ -1,3 +1,22 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# Olivier Devauchelle, 2021
+#
+# The original idea, and initial implementation, is from A.P. Petroff.
 
 import numpy as np
 
@@ -14,7 +33,20 @@ def equal_size_bins( x, nbins ) :
 
     return indices
 
+def linear_bins( x, nbins, margin = 1e-6 ) :
 
+    x_min, x_max = np.nanmin(x), np.nanmax(x)
+    bin_size = ( x_max - x_min )/nbins
+    margin *= bin_size
+    x_min, x_max = x_min - margin, x_max + margin
+
+    return np.linspace( x_min, x_max, nbins )
+
+def log_bins( x, nbins, margin = 1e-6 ) :
+
+    log_x = np.log( array( [ np.nanmin(x), np.nanmax(x) ] ) )
+
+    return exp( linear_bins( log_x, nbins, margin ) )
 
 class bindata :
     '''
@@ -50,22 +82,26 @@ class bindata :
 
         if indices is None :
 
-            if bins == 'equal_size' :
-                self.bins = None
-                self.indices = equal_size_bins( x, nbins )
+            try :
+                bins + ''
 
-            else :
+                if bins == 'equal_size' :
 
-                if bins == 'linear' :
-                    self.bins = np.linspace( min(x), max(x), nbins )
-
-                elif bins == 'log' :
-                    self.bins = np.logspace( np.log10( min(x) ), np.log10( max(x) ), nbins )
+                    self.bins = None
+                    self.indices = equal_size_bins( x, nbins )
 
                 else :
-                    self.bins = bins
 
-                self.indices = np.digitize( x, self.bins )
+                    if bins == 'linear' :
+                        self.bins = linear_bins( x, nbins )
+
+                    elif bins == 'log' :
+                        self.bins = log_bins( x, nbins )
+
+            except :
+                self.bins = bins
+
+            self.indices = np.digitize( x, self.bins )
 
         else :
             self.bins = None

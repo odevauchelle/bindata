@@ -19,7 +19,7 @@
 # The original idea, and initial implementation, is from A.P. Petroff.
 
 """
-BrownTrack main file
+bindata main file
 """
 
 __author__ = "Olivier Devauchelle"
