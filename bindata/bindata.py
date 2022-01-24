@@ -20,15 +20,21 @@
 
 import numpy as np
 
-def equal_size_bins( x, nbins ) :
+def equal_size_indices( x, nbins ) :
 
-    bin_size = int( len(x)/nbins )
+    n = len(x)
+    bin_size = n//nbins
+    total_nb_of_larger_bins = n%nbins
+
     indices = []
+    nb_of_larger_bins = 0
 
     for i in range( nbins ) :
-        indices += [ i ]*bin_size
+        if nb_of_larger_bins < total_nb_of_larger_bins :
+            indices += [ i ]*( bin_size + 1 )
+        else :
+            indices += [ i ]*bin_size
 
-    indices += [ indices[-1] + 1 ]*( len(x) - len( indices ) )
     indices = list( np.array(indices)[ np.argsort( x ) ] )
 
     return indices
@@ -44,9 +50,9 @@ def linear_bins( x, nbins, margin = 1e-6 ) :
 
 def log_bins( x, nbins, margin = 1e-6 ) :
 
-    log_x = np.log( array( [ np.nanmin(x), np.nanmax(x) ] ) )
+    log_x = np.log( np.array( [ np.nanmin(x), np.nanmax(x) ] ) )
 
-    return exp( linear_bins( log_x, nbins, margin ) )
+    return np.exp( linear_bins( log_x, nbins, margin ) )
 
 class bindata :
     '''
@@ -88,7 +94,7 @@ class bindata :
                 if bins == 'equal_size' :
 
                     self.bins = None
-                    self.indices = equal_size_bins( x, nbins )
+                    self.indices = equal_size_indices( x, nbins )
 
                 else :
 
@@ -99,9 +105,11 @@ class bindata :
                         self.bins = log_bins( x, nbins )
 
             except :
+
                 self.bins = bins
 
-            self.indices = np.digitize( x, self.bins )
+            if not self.bins is None :
+                self.indices = np.digitize( x, self.bins )
 
         else :
             self.bins = None
@@ -128,15 +136,16 @@ class bindata :
             self.data[ index ] = [ data[ selection ] for data in data ]
 
 
-    def apply( self, stat = None, empty_as_nan = True ) :
+    def apply( self, stat = None, empty_as_nan = True, sorted = False ) :
         '''
         Evaluate a statistical function on each bin.
 
-        X, Y = bindata.apply( stat = None, empty_as_nan = True )
+        X, Y = bindata.apply( stat = None, empty_as_nan = True, sorted = False )
 
         Arguments:
         stat : A function that applies to a 1D data set and returns a scalar (e.g. np.mean).
         empty_as_nan (Boolean) : whether empty bins result in np.nan.
+        sorted (Boolean) : whether to sort the bins according to first data row
         '''
 
         if stat is None :
@@ -151,7 +160,12 @@ class bindata :
             if empty_as_nan and len( output[-1] ) == 0 :
                 output[-1] = [ np.nan ]*self.nb_variables
 
-        return tuple( np.array( output ).T )
+        output = np.array( output ).T
+
+        if sorted :
+            output = output[ :, np.argsort( output[0,:] ) ]
+
+        return tuple( output )
 
 ########################
 #
@@ -178,8 +192,8 @@ if __name__ == '__main__' :
 
     errorbar( *b.apply(), *b.apply(std)[::-1], 'o' )
 
-    bb = bindata(x)
-
-    print( bb.apply() )
+    # bb = bindata(x)
+    #
+    # print( bb.apply() )
 
     show()
