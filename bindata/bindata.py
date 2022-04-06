@@ -157,13 +157,16 @@ class bindata :
 
             output += [ [ stat( bin ) for bin in bin ] ]
 
-            if empty_as_nan and len( output[-1] ) == 0 :
+            if len( output[-1] ) == 0 :
                 output[-1] = [ np.nan ]*self.nb_variables
 
         output = np.array( output ).T
 
         if sorted :
             output = output[ :, np.argsort( output[0,:] ) ]
+
+        if not empty_as_nan :
+            output = output[ :, np.where( np.product( ~np.isnan( output ), axis = 0 ) )[ 0 ] ]
 
         return tuple( output )
 
