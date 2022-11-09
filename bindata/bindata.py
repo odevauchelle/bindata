@@ -59,7 +59,7 @@ class bindata :
     Stores data into bins.
     '''
 
-    def __init__( self, *data, bins = 'linear', nbins = 10, indices = None, binning_data = 0 ) :
+    def __init__( self, *data, bins = 'linear', nbins = 10, indices = None, binning_data = 0, as_array = True, drop_outliers = True ) :
         '''
         Creates a bindata object, which stores data into bins.
 
@@ -74,10 +74,15 @@ class bindata :
         bins : A monotonic list of bins. If 'linear', 'log' or 'equal_size', the bins will be created automatically.
         nbins : Number of bins. Overridden by bins.
         binning_data: The index of the data with respect to which the binning is done.
+        as_array (True): Whether to treat the data as numpy arrays
+        drop_outliers (True): Whether to drop the data that lies outside the bins
 
         Output:
         b : The bindata object that stores x and y into bins.
         '''
+
+        if as_array :
+            data = np.array(data)
 
         self.nb_variables = len(data)
         x = data[binning_data]
@@ -116,6 +121,9 @@ class bindata :
             self.indices = indices
 
         self.set_of_indices = set( self.indices )
+
+        if drop_outliers :
+            self.set_of_indices = set( np.sort( list(self.set_of_indices) )[1:-1] )
 
         try :
             self.nbins = len( self.bins ) + 1
