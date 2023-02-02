@@ -73,6 +73,7 @@ class bindata :
         Keyword Arguments:
         bins : A monotonic list of bins. If 'linear', 'log' or 'equal_size', the bins will be created automatically.
         nbins : Number of bins. Overridden by bins.
+        indices : A list of ingeger indices, if not None, overrides bins and nbins.
         binning_data: The index of the data with respect to which the binning is done.
         as_array (True): Whether to treat the data as numpy arrays
         drop_outliers (True): Whether to drop the data that lies outside the bins
@@ -91,9 +92,10 @@ class bindata :
         # Create bins
         ################
 
-        if indices is None :
+        if indices is None : # indices are not provided
 
-            try :
+            try : # bins is a string
+
                 bins + ''
 
                 if bins == 'equal_size' :
@@ -109,26 +111,33 @@ class bindata :
                     elif bins == 'log' :
                         self.bins = log_bins( x, nbins )
 
-            except :
-
+            except : # bins is a list of values
                 self.bins = bins
 
-            if not self.bins is None :
-                self.indices = np.digitize( x, self.bins )
+            try : # indices already exist
+                self.indices
+            except : # indices are set by digitization into bins
+                self.indices = np.digitize( x, self.bins ) # digitize
 
-        else :
-            self.bins = None
+            self.set_of_indices = set( self.indices ) # only for the bins where there's something
+
+            try : # if bins exist
+                self.nbins = len(bins) + 1 # o|o|o|o
+            except : # there are no bins, only indices
+                self.nbins = len( self.set_of_indices )
+
+        else : # indices are provided, bins are not necessary
+            self.bins = bins # could be None
             self.indices = indices
-
-        self.set_of_indices = set( self.indices )
-
-        if drop_outliers :
-            self.set_of_indices = set( np.sort( list(self.set_of_indices) )[1:-1] )
-
-        try :
-            self.nbins = len( self.bins ) + 1
-        except :
+            self.set_of_indices = set( self.indices )
             self.nbins = len( self.set_of_indices )
+
+        if drop_outliers and not self.bins is None :
+
+            self.nbins -= 2 # |o|o|
+            self.indices -= 1
+            self.indices = self.indices[ ( self.indices >= 0 )*( self.indices < self.nbins ) ]
+            self.set_of_indices = set( self.indices )
 
         ################
         # Distribute data into bins
