@@ -14,7 +14,7 @@ y = sin( 10*x ) + ( rand( len( x ) ) - .5 )
 
 from bindata import bindata
 
-bd = bindata( x, y, bins = linspace(0.2,.6,10))
+bd = bindata( x, y, bins = linspace(0.2,.6,10), drop_outliers = True )
 X, Y = bd.apply()
 
 plot( x, y, '.', alpha = .3)

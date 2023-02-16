@@ -122,7 +122,7 @@ class bindata :
             self.set_of_indices = set( self.indices ) # only for the bins where there's something
 
             try : # if bins exist
-                self.nbins = len(bins) + 1 # o|o|o|o
+                self.nbins = len(  self.bins ) + 1 # o|o|o|o
             except : # there are no bins, only indices
                 self.nbins = len( self.set_of_indices )
 
@@ -132,11 +132,12 @@ class bindata :
             self.set_of_indices = set( self.indices )
             self.nbins = len( self.set_of_indices )
 
-        if drop_outliers and not self.bins is None : # |o|o|
-            self.set_of_indices -=  { 0, self.nbins-1 } # empty first and last bin
+        if not self.bins is None and drop_outliers :
+
+            self.nbins = len( self.bins ) - 1 # |o|o|
+            self.set_of_indices -=  { 0, self.nbins + 1 } # empty first and last bin
             self.set_of_indices = set( np.array( list( self.set_of_indices ) ) - 1 )
             self.indices -= 1
-            self.nbins -= 2
 
 
         ################
