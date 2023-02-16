@@ -127,17 +127,17 @@ class bindata :
                 self.nbins = len( self.set_of_indices )
 
         else : # indices are provided, bins are not necessary
-            self.bins = bins # could be None
+            self.bins = None
             self.indices = indices
             self.set_of_indices = set( self.indices )
             self.nbins = len( self.set_of_indices )
 
-        if drop_outliers and not self.bins is None :
-
-            self.nbins -= 2 # |o|o|
+        if drop_outliers and not self.bins is None : # |o|o|
+            self.set_of_indices -=  { 0, self.nbins-1 } # empty first and last bin
+            self.set_of_indices = set( np.array( list( self.set_of_indices ) ) - 1 )
             self.indices -= 1
-            self.indices = self.indices[ ( self.indices >= 0 )*( self.indices < self.nbins ) ]
-            self.set_of_indices = set( self.indices )
+            self.nbins -= 2
+
 
         ################
         # Distribute data into bins
@@ -151,6 +151,7 @@ class bindata :
             selection = np.where( self.indices == index )[0]
             self.nb[ index ] = len( selection )
             self.data[ index ] = [ data[ selection ] for data in data ]
+
 
 
     def apply( self, stat = None, empty_as_nan = True, sorted = False ) :

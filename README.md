@@ -35,7 +35,14 @@ X, Y = bindata( x, y, bins = 'equal_size' ).apply()
 ```
 We can also set the bins by hand.
 ```Python
-X, Y = bindata( x, y, bins = linspace(0,.5,10) ).apply()
+bd = bindata( x, y, bins = linspace(0.2,.6,10))
+X, Y = bd.apply()
+
+plot( x, y, '.', alpha = .3)
+plot( X, Y, 'o' )
+
+for bin_boundary in bd.bins :
+    axvline( bin_boundary, color = 'k', alpha = .1 )
 ```
 
 ![Choose the bins](figures/choose_the_bins.svg)
