@@ -88,9 +88,10 @@ class bindata :
 
         self.nb_variables = len(data)
 
-        if sort_data and bins == 'equal_size':
-            sorted_index = np.argsort( data[binning_data] )
-            data = np.array( data[:,sorted_index] )
+        if type(bins) == type('') :
+            if sort_data and bins == 'equal_size':
+                sorted_index = np.argsort( data[binning_data] )
+                data = np.array( data[:,sorted_index] )
         
         x = data[binning_data]
 
